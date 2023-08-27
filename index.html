@@ -68,7 +68,7 @@ function tratarMensagem(message) {
         return;
     } else if (estado.nome === '') {
         estado.nome = message.body;
-        client.sendMessage(message.from, `Olá ${estado.nome}, vou te enviar as opções da Pizzaria do Genios do Excel`);
+        client.sendMessage(message.from, `Olá ${estado.nome}, vou te enviar as opções da Pizzaria ChatBot`);
         imprimirMenu(message.from);
         return;
     }
