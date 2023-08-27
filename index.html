@@ -1,0 +1,170 @@
+<html>
+    <head>
+        <title>Pizza Chatbot</title>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" />
+        <style>
+            #mensagens {
+                max-height: 400px;
+                overflow: auto;
+            }
+        </style>
+    </head>
+    <body class="container">
+        <h1>Pizza Chatbot</h1>
+
+
+        <form name="frm" onsubmit="tratarMensagem(gerarMensagem(frm.mensagem.value));frm.mensagem.value = ''; return false;">
+            <input type="text" name="mensagem" class="form-control" placeholder="Digite sua mensagem" />
+        </form>
+
+        <ul id="mensagens" class="list-group">
+        </ul>
+
+        <script type="text/javascript">
+
+
+
+
+var estados = {};
+
+var client = {
+    sendMessage: function(contato, texto){
+        var li = document.createElement('li');
+        li.innerHTML = texto.replace(/\n/g, '<br />');
+        li.classList.add('list-group-item');
+        var lista = document.getElementById('mensagens');
+        lista.appendChild(li);
+        li.scrollIntoView();
+    }
+}
+
+function gerarMensagem(texto){
+    return {
+        from: '552199999999',
+        body: texto
+    };
+}
+
+function tratarMensagem(message) {
+    console.log(`${message.from} > ${message.body}`)
+
+    var estado = estados[message.from];
+
+    if (estado == null) {
+        estado = {
+            nome: '',
+            pedido: {
+                produtoAtual: null,
+                produtos: []
+            }
+        };
+        estados[message.from] = estado;
+
+        client.sendMessage(message.from, 'Ola, seja muito bem vindo!');
+        client.sendMessage(message.from, 'Antes da gente começar, me fala primeiro qual o seu nome?');
+        return;
+    } else if(message.body.length === 0){
+        client.sendMessage(message.frm, 'Escreva uma mensagem!');
+        return;
+    } else if (estado.nome === '') {
+        estado.nome = message.body;
+        client.sendMessage(message.from, `Olá ${estado.nome}, vou te enviar as opções da Pizzaria do Genios do Excel`);
+        imprimirMenu(message.from);
+        return;
+    }
+
+    switch (message.body) {
+        case '1':
+            imprimirPizzas(estado, message.from);
+            break;
+        case '1.1':
+            estado.pedido.produtoAtual = 'FRANGO';
+            client.sendMessage(message.from, 'Escolha o tamanho:\nB = Brotinho\nG = Grande\nF = Família');
+            break;
+        case '1.2':
+            estado.pedido.produtoAtual = 'CALABRESA';
+            client.sendMessage(message.from, 'Escolha o tamanho:\nB = Brotinho\nG = Grande\nF = Família');
+            break;
+        case '1.3':
+            estado.pedido.produtoAtual = 'VEGETARIANA';
+            client.sendMessage(message.from, 'Escolha o tamanho:\nB = Brotinho\nG = Grande\nF = Família');
+            break;
+        case 'B':
+        case 'G':
+        case 'F':
+            if (estado.produtoAtual === null) {
+                message.reply('Escolha a pizza primeiro!');
+                return;
+            }
+
+            estado.pedido.produtos.push({
+                produto: estado.pedido.produtoAtual,
+                tamanho: message.body
+            });
+            estado.pedido.produtoAtual = null;
+            client.sendMessage(message.from, 'Produto adicionado!');
+            imprimirCarrinho(estado, message.from);
+            imprimirPizzas(estado, message.from);
+            break;
+        case '2':
+            client.sendMessage(message.from, 'Seu pedido está a caminho!');
+            break;
+        case '3':
+            {
+                setTimeout(function () {
+                    message.reply(`${estado.nome}, seu contato já foi encaminhado para um dos nosso atendentes`);
+                    client.sendMessage('557199268816@c.us', `Cliente aguardando contato: https:wa.me/${contact.number}`);
+                }, 1000 + Math.floor(Math.random() * 1000));
+                break;
+            }
+        case '99':
+
+            client.sendMessage(message.from, 'Finalizando seu pedido ....');
+            imprimirCarrinho(estado, message.from);
+            client.sendMessage(message.from, 'Pedido finalizado! Obrigado pela preferência!');
+            estado.pedido.produtos = [];
+            estado.pedido.produtoAtual = null;
+            imprimirMenu(message.from);
+            break;
+        case '00':
+            client.sendMessage(message.from, '1. Fazer Pedido \n2. Acompanhar Pedido\n3. Falar com um atendente ');
+            break;
+        default:
+            client.sendMessage(message.frm, 'Não entendi sua mensagem!');
+            break;
+    }
+
+}
+
+function imprimirCarrinho(estado, destino) {
+    var msg = 'Estes são os produtos no carrinho:\n\n';
+    for (let produto of estado.pedido.produtos) {
+        msg += `    - ${produto.produto} (${produto.tamanho})\n`;
+    }
+
+    client.sendMessage(destino, msg);
+}
+
+function imprimirPizzas(estado, destino) {
+    var msg = '1.1 - Frango \n1.2 - Calabresa\n1.3 - Vegetariana\n';
+
+    if (estado.pedido.produtos.length) {
+        msg += "99 - Finalizar pedido\n";
+    }
+
+    msg += "00 - Voltar para o Menu Inicial "
+    client.sendMessage(destino, msg);
+}
+
+function falarComAtendente(){
+
+}
+
+function imprimirMenu(destino) {
+    client.sendMessage(destino, '1. Fazer Pedido \n2. Acompanhar Pedido\n<a target="_blank" href="https://web.whatsapp.com/send?phone=557199268816">Falar com um atendente</a> ');
+}
+
+
+        </script>
+    </body>
+</html>
